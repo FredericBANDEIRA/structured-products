@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 01: Structuring 101 & Architecture — Structured Products Academy</title>
+    <meta name="description" content="Master the foundations of structured products: zero-coupon + derivative replication, master pricing identity, EMTN vs SPV wrappers, desk economics, and institutional term sheets.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        /* ==========================================================================
+           DARK LUXURY EMERALD & GOLD DESIGN SYSTEM
+           Swiss Private Wealth • Institutional Structuring Desk • Haute Finance
+           ========================================================================== */
+        :root {
+            --bg: #040907;
+            --bg-alt: #07120e;
+            --bg-card: #0b1a14;
+            --surface: #0f221a;
+            --surface-2: #142c22;
+            --surface-3: #1a382b;
+            --surface-hover: #1f4233;
+
+            /* Metallic Burnished Gold Accents */
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-bright: #dfb743;
+            --gold-dark: #997819;
+            --gold-dim: rgba(212, 175, 55, 0.12);
+            --gold-glow: rgba(212, 175, 55, 0.22);
+            --gold-strong-glow: rgba(212, 175, 55, 0.40);
+            --border-gold: rgba(212, 175, 55, 0.25);
+            --border-gold-subtle: rgba(212, 175, 55, 0.14);
+
+            /* Imperial Deep Emerald */
+            --emerald: #10b981;
+            --emerald-light: #34d399;
+            --emerald-dark: #059669;
+            --emerald-dim: rgba(16, 185, 129, 0.12);
+            --emerald-glow: rgba(16, 185, 129, 0.25);
+
+            /* Downside Risk / Barrier Crimson */
+            --crimson: #e11d48;
+            --crimson-light: #fb7185;
+            --crimson-dim: rgba(225, 29, 72, 0.15);
+
+            /* Typography & Hairlines */
+            --text-primary: #f8faf9;
+            --text-secondary: #9cb3a8;
+            --text-muted: #647d71;
+            --text-gold: #e5c86c;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hairline: rgba(212, 175, 55, 0.18);
+
+            /* Typography Stacks */
+            --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+            --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+            /* Radii & Transitions */
+            --radius-xs: 4px;
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* ===== Base Reset ===== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.65;
+            font-weight: 400;
+        }
+
+        /* ===== Background Ambient Canvas ===== */
+        .ambient-canvas-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .ambient-canvas-wrapper canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* ===== Layout Container ===== */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 28px 100px;
+        }
+
+        /* ===== Top Navigation Bar ===== */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0 18px;
+            border-bottom: 1px solid var(--border-hairline);
+            margin-bottom: 24px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-family: var(--font-body);
+            font-size: 0.84rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: var(--transition);
+            padding: 6px 14px;
+            border-radius: var(--radius-xs);
+            border: 1px solid transparent;
+        }
+
+        .back-link:hover {
+            color: var(--gold-light);
+            background: var(--surface);
+            border-color: var(--border-gold);
+            transform: translateX(-3px);
+        }
+
+        .back-link svg {
+            width: 15px;
+            height: 15px;
+            stroke-width: 2;
+            transition: transform 0.2s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-progress-cluster {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .module-badge {
+            font-family: var(--font-display);
+            font-size: 0.72rem;
+            color: var(--gold);
+            background: var(--gold-dim);
+            border: 1px solid var(--border-gold);
+            padding: 5px 14px;
+            border-radius: var(--radius-xs);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .module-progress-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .dot.active {
+            background: var(--gold);
+            box-shadow: 0 0 8px var(--gold);
+            border-color: var(--gold-light);
+        }
+
+        /* ===== Header Bar ===== */
+        .module-header {
+            text-align: center;
+            padding: 24px 0 32px;
+        }
+
+        .module-kicker {
+            font-family: var(--font-display);
+            font-size: 0.74rem;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.24em;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .module-header h1 {
+            font-family: var(--font-display);
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            line-height: 1.2;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .module-header h1 span.gold-highlight {
+            background: linear-gradient(135deg, #ffffff 0%, #f3e5ab 45%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .module-header .subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 680px;
+            margin: 0 auto;
+            font-weight: 350;
+            line-height: 1.65;
+        }
+
+        /* ===== Navigation Tabs ===== */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-hairline);
+            margin-bottom: 36px;
+            overflow-x: auto;
+            padding-bottom: 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-tab {
+            padding: 12px 20px;
+            font-family: var(--font-display);
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: var(--transition);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .nav-tab:hover {
+            color: var(--gold-light);
+        }
+
+        .nav-tab.active {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+            text-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== Cards & Containers ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-sm);
+            padding: 32px 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+        }
+
+        .card-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-hairline);
+        }
+
+        .card h2 {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card h3 {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin: 24px 0 12px;
+            letter-spacing: 0.03em;
+        }
+
+        .card p, .card li {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-weight: 350;
+        }
+
+        .card ul, .card ol {
+            padding-left: 20px;
+            margin: 12px 0;
+        }
+
+        .card li {
+            margin-bottom: 8px;
+        }
+
+        .card li strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ===== Formula Blocks (KaTeX) ===== */
+        .formula-block {
+            background: var(--bg-alt);
+            border: 1px solid var(--border-hairline);
+            border-left: 3px solid var(--gold);
+            border-radius: var(--radius-xs);
+            padding: 18px 22px;
+            margin: 20px 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .formula-label {
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--gold);
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        /* ===== Comparison Grids & Columns ===== */
+        .two-col-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 820px) {
+            .two-col-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-box {
+            background: var(--surface);
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-xs);
+            padding: 20px;
+        }
+
+        .feature-box-title {
+            font-family: var(--font-display);
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== Tables ===== */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 22px 0;
+            border-radius: var(--radius-xs);
+            border: 1px solid var(--border-hairline);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        th {
+            background: var(--surface-2);
+            font-family: var(--font-display);
+            color: var(--gold-light);
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-gold);
+            white-space: nowrap;
+            letter-spacing: 0.05em;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-weight: 350;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(212, 175, 55, 0.03);
+            color: var(--text-primary);
+        }
+
+        /* ===== Alert Boxes ===== */
+        .alert-box {
+            background: var(--surface);
+            border-left: 3px solid var(--gold);
+            border-radius: var(--radius-xs);
+            padding: 16px 20px;
+            margin: 20px 0;
+            font-size: 0.88rem;
+        }
+
+        .alert-box.tip {
+            border-left-color: var(--emerald);
+            background: rgba(16, 185, 129, 0.06);
+        }
+
+        .alert-box.warning {
+            border-left-color: var(--crimson);
+            background: rgba(225, 29, 72, 0.06);
+        }
+
+        .alert-title {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+
+        .alert-box.tip .alert-title { color: var(--emerald-light); }
+        .alert-box.warning .alert-title { color: var(--crimson-light); }
+        .alert-box .alert-title { color: var(--gold); }
+
+        /* ==========================================================================
+           INTERACTIVE PRICING IDENTITY & BUDGET SLICER ENGINE
+           ========================================================================== */
+        .slicer-container {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 28px;
+            align-items: stretch;
+            margin: 24px 0;
+        }
+
+        @media (max-width: 960px) {
+            .slicer-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .canvas-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-xs);
+            padding: 18px;
+            position: relative;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 380px;
+        }
+
+        .canvas-wrapper canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .slicer-controls {
+            background: var(--bg-alt);
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-xs);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .slider-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .slider-badge {
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--gold);
+            background: var(--surface);
+            border: 1px solid var(--border-gold-subtle);
+            padding: 2px 8px;
+            border-radius: var(--radius-xs);
+            font-weight: 600;
+        }
+
+        .control-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            background: var(--surface-2);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--gold);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--gold-glow);
+            transition: transform 0.15s ease;
+            border: 1.5px solid #040907;
+        }
+
+        .control-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: var(--gold-light);
+        }
+
+        .kpi-panel {
+            background: var(--surface);
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-xs);
+            padding: 16px;
+        }
+
+        .kpi-title {
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--gold);
+            letter-spacing: 0.14em;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .kpi-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            margin-bottom: 8px;
+        }
+
+        .kpi-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .kpi-row .lbl { color: var(--text-secondary); }
+        .kpi-row .val { font-family: var(--font-mono); font-weight: 600; }
+        .val.gold { color: var(--gold); }
+        .val.emerald { color: var(--emerald-light); }
+        .val.crimson { color: var(--crimson-light); }
+
+        .btn-reset {
+            background: var(--bg-card);
+            border: 1px solid var(--border-hairline);
+            color: var(--text-secondary);
+            font-family: var(--font-display);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 9px 16px;
+            border-radius: var(--radius-xs);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .btn-reset:hover {
+            color: var(--gold-light);
+            border-color: var(--border-gold);
+            background: var(--surface);
+        }
+
+        /* ==========================================================================
+           TERM SHEET WALKTHROUGH & INTERVIEW DRILLS
+           ========================================================================== */
+        .termsheet-box {
+            background: var(--surface);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-xs);
+            padding: 24px;
+            margin: 20px 0;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            position: relative;
+        }
+
+        .termsheet-header {
+            font-family: var(--font-display);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-hairline);
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .termsheet-field {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            margin-bottom: 6px;
+        }
+
+        @media (max-width: 650px) {
+            .termsheet-field {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .termsheet-field .key {
+            color: var(--gold-light);
+            font-weight: 600;
+        }
+
+        .termsheet-field .val {
+            color: var(--text-primary);
+        }
+
+        /* Q&A Accordion Cards */
+        .qa-card {
+            background: var(--surface);
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-xs);
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .qa-card:hover {
+            border-color: var(--border-gold);
+        }
+
+        .qa-question {
+            padding: 18px 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.02em;
+            user-select: none;
+        }
+
+        .qa-question:hover {
+            color: var(--gold-light);
+        }
+
+        .qa-chevron {
+            font-size: 0.75rem;
+            color: var(--gold);
+            transition: transform 0.25s ease;
+        }
+
+        .qa-card.open .qa-chevron {
+            transform: rotate(180deg);
+        }
+
+        .qa-answer {
+            display: none;
+            padding: 0 22px 20px;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            border-top: 1px solid var(--border-hairline);
+            padding-top: 14px;
+        }
+
+        .qa-card.open .qa-answer {
+            display: block;
+        }
+
+        /* ===== Footer Navigation ===== */
+        .module-nav-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-hairline);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .module-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-display);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--gold);
+            text-decoration: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            padding: 10px 20px;
+            border-radius: var(--radius-xs);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transition: var(--transition);
+        }
+
+        .module-nav-btn:hover {
+            background: var(--surface);
+            color: var(--gold-light);
+            box-shadow: 0 0 16px var(--gold-glow);
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 0 20px;
+            font-family: var(--font-display);
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Luxury Gold Constellation Canvas -->
+    <div class="ambient-canvas-wrapper">
+        <canvas id="ambientCanvas"></canvas>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <a href="index.html" class="back-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Academy Catalog
+            </a>
+            <div class="nav-progress-cluster">
+                <span class="module-badge">Module 01 / 10</span>
+                <div class="module-progress-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Module Header -->
+        <header class="module-header">
+            <span class="module-kicker">Core Foundations • S&amp;T Financial Engineering</span>
+            <h1>Structuring 101 &amp; <span class="gold-highlight">Architecture</span></h1>
+            <p class="subtitle">
+                Deconstruct the DNA of structured notes: the master pricing identity, wrapper legalities, desk funding margins, and secondary market liquidity.
+            </p>
+        </header>
+
+        <!-- Standardized 5-Section Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="tab-pitch">1. Client Pitch &amp; Taxonomy</button>
+            <button class="nav-tab" data-tab="tab-pricing">2. Pricing Identity &amp; Slicer</button>
+            <button class="nav-tab" data-tab="tab-wrappers">3. Legal Wrappers &amp; Bail-In</button>
+            <button class="nav-tab" data-tab="tab-economics">4. Desk Economics &amp; Secondary</button>
+            <button class="nav-tab" data-tab="tab-termsheet">5. Term Sheet &amp; Interview Q&amp;A</button>
+        </div>
+
+        <!-- ==========================================================================
+             TAB 1: CLIENT PITCH & TAXONOMY
+             ========================================================================== -->
+        <div class="tab-panel active" id="tab-pitch">
+            <div class="card">
+                <div class="card-header-bar">
+                    <h2>What is a Structured Product?</h2>
+                    <span class="module-badge">Institutional Definition</span>
+                </div>
+                <p>
+                    A <strong>Structured Product</strong> is a synthetic investment instrument engineered by combining an unsecured debt security (typically a Zero-Coupon Bond) with one or more financial derivative contracts (options, swaps, forwards).
+                </p>
+                <p style="margin-top: 12px;">
+                    Rather than offering a standard fixed or floating coupon, its terminal payoff and periodic cash flows are contractually linked to the performance of one or more <strong>underlying assets</strong> (equities, interest rate curves, FX crosses, commodities, or credit indices).
+                </p>
+
+                <div class="two-col-grid">
+                    <div class="feature-box">
+                        <div class="feature-box-title">
+                            <span>🏛️</span> The Issuer Perspective (The Bank)
+                        </div>
+                        <ul>
+                            <li><strong>Cheap Term Funding:</strong> The bank issues senior debt directly to wealth clients, accessing funding at rates cheaper than institutional wholesale bond markets ($\text{SOFR} - 25\text{ bps}$ effective).</li>
+                            <li><strong>Upfront Fee Extraction:</strong> The bank monetizes upfront structuring commissions ($1.0\% - 3.5\%$) plus secondary market trading bid/ask spreads.</li>
+                            <li><strong>Flow Recycling:</strong> The trading desk absorbs client-sold optionality (e.g., downside put options from Reverse Convertibles) to offset its own institutional books.</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-box">
+                        <div class="feature-box-title">
+                            <span>💼</span> The Investor Perspective (The Client)
+                        </div>
+                        <ul>
+                            <li><strong>Asymmetric Risk/Reward:</strong> Create bespoke payoffs unachievable with physical cash instruments (e.g., $100\%$ capital protection + $80\%$ equity rally participation).</li>
+                            <li><strong>Yield Enhancement in Flat Markets:</strong> Monetize range-bound or sideways equities to extract $8\% - 14\%$ annual coupons when bonds pay $3\%$.</li>
+                            <li><strong>Regulatory &amp; Tax Packaging:</strong> Access derivatives and foreign asset classes inside a clean securities account via an ISIN, without requiring complex OTC ISDA documentation.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>The European &amp; Swiss Structuring Taxonomy (EUSIPA / SSPA)</h3>
+                <p>
+                    The global structuring industry adheres strictly to the four standardized product categories defined by the <strong>European Structured Investment Products Association (EUSIPA)</strong> and <strong>Swiss Structured Products Association (SSPA)</strong>:
+                </p>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Primary Objective</th>
+                                <th>Typical Derivative Package</th>
+                                <th>Benchmark Products</th>
+                                <th>Target Market Profile</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong style="color: var(--emerald-light);">Class I: Capital Protection</strong></td>
+                                <td>Preserve 100% nominal at maturity + upside participation</td>
+                                <td>$\text{ZCB} + \text{Call Option}$ (or Call Spread)</td>
+                                <td>Protected Tracker, Shark Note, Capital Protected Note</td>
+                                <td>Conservative private wealth, pension funds, risk-averse retail</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: var(--gold-light);">Class II: Yield Enhancement</strong></td>
+                                <td>Maximize periodic coupons in flat or sideways markets</td>
+                                <td>$\text{Bond} - \text{Down-and-In Put Option}$</td>
+                                <td>Barrier Reverse Convertible (BRC), Phoenix Autocallable</td>
+                                <td>Income-seeking wealth clients willing to take downside equity tail risk</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: #60a5fa;">Class III: Participation</strong></td>
+                                <td>Capture linear or asymmetric upside without cap</td>
+                                <td>$\text{Underlying Asset} + \text{Put Spread} / \text{Replicating Forward}$</td>
+                                <td>Tracker Certificate, Outperformance Note, Twin-Win Note</td>
+                                <td>Bullish investors seeking enhanced delta without paying option decay</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: var(--crimson-light);">Class IV: Exotics &amp; Hybrids</strong></td>
+                                <td>Leverage, correlation arbitrage, curve slope monetization</td>
+                                <td>Multi-asset options, CMS curve spreads, default baskets</td>
+                                <td>Worst-Of Autocall, CMS Steepener, CLN, Turbo Warrant</td>
+                                <td>Sophisticated family offices, hedge funds, aggressive private clients</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert-box tip">
+                    <div class="alert-title">MiFID II &amp; PRIIPs Compliance Rule</div>
+                    Under European MiFID II regulations, all structured products distributed to non-institutional clients must include a standardized <strong>Packaged Retail and Insurance-based Investment Products (PRIIPs) KID</strong>. This document specifies the <strong>Summary Risk Indicator (SRI 1 to 7)</strong>, performance scenarios (Favourable, Moderate, Unfavourable, Stress), and total reduction in yield (RIY) resulting from structuring fees.
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             TAB 2: PRICING IDENTITY & SLICER
+             ========================================================================== -->
+        <div class="tab-panel" id="tab-pricing">
+            <div class="card">
+                <div class="card-header-bar">
+                    <h2>The Master Pricing Identity</h2>
+                    <span class="module-badge">Mathematical DNA</span>
+                </div>
+
+                <p>
+                    Every structured product, regardless of complexity or underlying asset class, obeys the <strong>Fundamental Theorem of Structuring</strong>:
+                </p>
+
+                <div class="formula-block">
+                    <div class="formula-label">The Structuring Replication Formula</div>
+                    $$\text{Price}_{\text{Structured Note}} = \text{ZCB}(0, T) \times \left(1 + \text{Funding Spread}\right) + \sum_{i=1}^M w_i \cdot \text{Option}_i(S, K_i, T) + \text{Desk Margin}$$
+                </div>
+
+                <p>
+                    When a bank sells a $\$100$ par structured note at inception ($t = 0$), the $\$100$ cash received is carved into three distinct economic buckets:
+                </p>
+
+                <div class="two-col-grid">
+                    <div class="feature-box">
+                        <div class="feature-box-title">1. The Zero-Coupon Bond (ZCB) Leg</div>
+                        <p>
+                            To guarantee $\$100$ redemption at maturity $T$, the desk buys (or credits to the bank treasury) a Zero-Coupon Bond maturing at $\$100$:
+                        </p>
+                        $$\text{PV}_{\text{ZCB}} = \frac{100}{\left(1 + r + s\right)^T} = 100 \cdot e^{-(r + s) T}$$
+                        <p style="margin-top: 8px;">
+                            where $r$ is the benchmark risk-free rate (e.g., SOFR or €STR swap rate) and $s$ is the bank's unsecured term funding spread.
+                        </p>
+                    </div>
+
+                    <div class="feature-box">
+                        <div class="feature-box-title">2. The Available Option Budget</div>
+                        <p>
+                            Whatever capital remains after purchasing the ZCB and deducting bank fees constitutes the <strong>Derivative Option Budget</strong>:
+                        </p>
+                        $$\text{Option Budget} = 100 - \text{PV}_{\text{ZCB}} - \text{Desk Margin}$$
+                        <p style="margin-top: 8px;">
+                            This budget is handed to the exotics desk to purchase upside calls, barrier options, or subsidize guaranteed coupons.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Canvas Budget Slicer -->
+                <div class="slicer-container">
+                    <div class="canvas-card">
+                        <div class="canvas-wrapper">
+                            <canvas id="budgetCanvas"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="slicer-controls">
+                        <div class="slider-group">
+                            <div class="slider-item">
+                                <div class="slider-header">
+                                    <span>Risk-Free Rate ($r$)</span>
+                                    <span class="slider-badge" id="valRate">4.00%</span>
+                                </div>
+                                <input type="range" class="control-slider" id="sliderRate" min="0" max="8" step="0.25" value="4.00">
+                            </div>
+
+                            <div class="slider-item">
+                                <div class="slider-header">
+                                    <span>Bank Funding Spread ($s$)</span>
+                                    <span class="slider-badge" id="valSpread">75 bps</span>
+                                </div>
+                                <input type="range" class="control-slider" id="sliderSpread" min="0" max="300" step="10" value="75">
+                            </div>
+
+                            <div class="slider-item">
+                                <div class="slider-header">
+                                    <span>Note Maturity ($T$)</span>
+                                    <span class="slider-badge" id="valMaturity">3 Years</span>
+                                </div>
+                                <input type="range" class="control-slider" id="sliderMaturity" min="1" max="10" step="1" value="3">
+                            </div>
+
+                            <div class="slider-item">
+                                <div class="slider-header">
+                                    <span>Structuring Fee &amp; Margin</span>
+                                    <span class="slider-badge" id="valFee">2.00%</span>
+                                </div>
+                                <input type="range" class="control-slider" id="sliderFee" min="0.5" max="4.0" step="0.25" value="2.00">
+                            </div>
+                        </div>
+
+                        <div class="kpi-panel">
+                            <div class="kpi-title">Capital Allocation Breakdown</div>
+                            <div class="kpi-row">
+                                <span class="lbl">Zero-Coupon Bond Cost:</span>
+                                <span class="val gold" id="kpiZcbCost">$86.96</span>
+                            </div>
+                            <div class="kpi-row">
+                                <span class="lbl">Bank Structuring Fee:</span>
+                                <span class="val crimson" id="kpiFeeCost">$2.00</span>
+                            </div>
+                            <div class="kpi-row">
+                                <span class="lbl">Net Option Budget:</span>
+                                <span class="val emerald" id="kpiOptionBudget">$11.04</span>
+                            </div>
+                            <div class="kpi-row">
+                                <span class="lbl">3Y Call Participation:</span>
+                                <span class="val gold" id="kpiParticipation">78.5%</span>
+                            </div>
+                        </div>
+
+                        <button class="btn-reset" id="btnResetSlicer">
+                            <span>↺</span> Reset Parameters
+                        </button>
+                    </div>
+                </div>
+
+                <div class="alert-box tip">
+                    <div class="alert-title">Structuring Rule of Thumb: The Interest Rate Engine</div>
+                    Notice how sensitive the Option Budget is to rates! When rates are $1\%$, a 3-year ZCB costs $\$94.26$, leaving only $\$3.74$ for options. When rates rise to $5\%$, the ZCB costs $\$84.44$, ballooning the Option Budget to <strong>$\$13.56$ (a $260\%$ increase!)</strong>. This is why capital-protected notes thrive during high-rate regimes.
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             TAB 3: LEGAL WRAPPERS & BAIL-IN
+             ========================================================================== -->
+        <div class="tab-panel" id="tab-wrappers">
+            <div class="card">
+                <div class="card-header-bar">
+                    <h2>Legal Wrappers &amp; Structural Architecture</h2>
+                    <span class="module-badge">Documentation &amp; Risk</span>
+                </div>
+
+                <p>
+                    A structured payoff cannot float in a vacuum. It must be packaged inside a legally enforceable <strong>regulatory wrapper</strong>. The wrapper dictates whether the note carries bank credit risk, how it is taxed, whether it settles via Euroclear, and what happens in a bank resolution.
+                </p>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Wrapper Type</th>
+                                <th>Legal Structure</th>
+                                <th>Credit Risk Source</th>
+                                <th>Bail-in Subject?</th>
+                                <th>Typical Market Use</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong style="color: var(--gold);">EMTN (Euro Medium Term Note)</strong></td>
+                                <td>Senior unsecured debt issuance program</td>
+                                <td>Issuing Bank (Bail-inable)</td>
+                                <td><span style="color: var(--crimson-light); font-weight:600;">YES</span> (BRRD)</td>
+                                <td>$85\%$ of institutional &amp; private wealth structured notes</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: var(--gold);">Exchange Traded Certificate / Warrant</strong></td>
+                                <td>Securitized bearer debt derivative</td>
+                                <td>Issuing Bank</td>
+                                <td><span style="color: var(--crimson-light); font-weight:600;">YES</span></td>
+                                <td>Retail public offerings listed on Euronext, Boerse Frankfurt, SIX</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: var(--emerald-light);">Structured Deposit</strong></td>
+                                <td>Bank deposit linked to index/rates</td>
+                                <td>Issuing Bank (FDIC / DGS Insured)</td>
+                                <td><span style="color: var(--emerald-light); font-weight:600;">NO</span> (up to €100k/£85k)</td>
+                                <td>Conservative retail, corporate treasury seeking capital guarantee</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: #60a5fa;">Structured UCITS Fund / SICAV</strong></td>
+                                <td>Ring-fenced open-ended collective vehicle</td>
+                                <td>Collateral Basket + Swap Counterparty</td>
+                                <td><span style="color: var(--emerald-light); font-weight:600;">NO</span> (Off-balance sheet)</td>
+                                <td>Regulated European institutions, pension funds, UCITS mandates</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: var(--gold-light);">SPV (Special Purpose Vehicle) Repack</strong></td>
+                                <td>Bankruptcy-remote vehicle (Jersey/Lux/Ireland)</td>
+                                <td>High-Grade Collateral (Bunds, Gilts)</td>
+                                <td><span style="color: var(--emerald-light); font-weight:600;">NO</span> (Bankruptcy Remote)</td>
+                                <td>Institutional bespoke repackaging, sovereign wealth funds</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>The BRRD Bail-In Framework &amp; The Lehman Lesson</h3>
+                <p>
+                    Prior to September 2008, retail investors purchasing structured notes treated capital protection as "risk-free". When Lehman Brothers filed for bankruptcy, investors discovered that a $100\%$ capital-protected Lehman note was simply senior unsecured debt of Lehman Brothers Holdings Inc. — resulting in recovery rates below $20\text{ cents on the dollar}$.
+                </p>
+
+                <div class="two-col-grid">
+                    <div class="feature-box">
+                        <div class="feature-box-title">The BRRD Bail-In Cascade</div>
+                        <p>
+                            Under the European <strong>Bank Recovery and Resolution Directive (BRRD)</strong>, if a systemic bank faces insolvency, resolution authorities write down or convert liabilities into equity in strict order:
+                        </p>
+                        <ol style="margin-top: 8px;">
+                            <li>Common Equity Tier 1 (CET1)</li>
+                            <li>Additional Tier 1 (AT1 Contingent Convertibles)</li>
+                            <li>Tier 2 Subordinated Debt</li>
+                            <li><strong>Senior Non-Preferred &amp; Senior Unsecured Debt (EMTN Structured Notes)</strong></li>
+                        </ol>
+                    </div>
+
+                    <div class="feature-box">
+                        <div class="feature-box-title">SPV Repacks as the Safe Haven</div>
+                        <p>
+                            For institutional clients who refuse bank bail-in risk, structuring desks deploy <strong>Special Purpose Vehicles (SPVs)</strong>.
+                        </p>
+                        <p style="margin-top: 8px;">
+                            The SPV issues notes to the investor and uses the proceeds to buy AAA-rated sovereign debt (German Bunds, US Treasuries) as collateral. The bank only provides an OTC derivative swap to deliver the payoff. If the bank fails, the collateral belongs strictly to the noteholders.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="alert-box warning">
+                    <div class="alert-title">Credit Rating Distinction: Issuer vs Issue</div>
+                    Always verify whether a structured note has its own debt rating or relies entirely on the <strong>Issuer's Long-Term Senior Debt Rating</strong>. Most EMTN structured notes are unrated individually; their creditworthiness is identical to the bank's senior credit default swap (CDS) spread.
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             TAB 4: DESK ECONOMICS & SECONDARY MARKET
+             ========================================================================== -->
+        <div class="tab-panel" id="tab-economics">
+            <div class="card">
+                <div class="card-header-bar">
+                    <h2>Desk Economics &amp; Secondary Market Lifecycle</h2>
+                    <span class="module-badge">Trading Desk P&amp;L</span>
+                </div>
+
+                <p>
+                    How does an investment banking structuring desk generate tens of millions in annual P&amp;L? The revenue model is multi-dimensional and spans the entire lifecycle of the product.
+                </p>
+
+                <div class="two-col-grid">
+                    <div class="feature-box">
+                        <div class="feature-box-title">1. Upfront Structuring &amp; Distribution Fee</div>
+                        <p>
+                            When a $\$100\text{M}$ campaign of Phoenix Autocallables is sold, the bank typically embeds a $2.5\% - 3.5\%$ total upfront load into the note price ($100\%$ issue price, but manufactured for $\$96.50$).
+                        </p>
+                        <ul>
+                            <li><strong>Distributor Retrocession:</strong> $1.5\% - 2.5\%$ paid to the private bank / wealth advisor as sales commission.</li>
+                            <li><strong>Arrangement Margin:</strong> $0.5\% - 1.0\%$ retained directly by the structuring desk.</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-box">
+                        <div class="feature-box-title">2. Internal Derivative Flow Margin</div>
+                        <p>
+                            The structuring desk sources options internally from the exotics trading desk.
+                        </p>
+                        <ul>
+                            <li>The exotics desk quotes an OTC option package at the <strong>mid-market price</strong> with a built-in bid/ask markup.</li>
+                            <li>Client-sold volatility (e.g. puts in BRCs) is acquired at cheap implied vol, giving the trading book valuable short gamma and skew hedging flow.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Secondary Market Quoting &amp; Spread Mechanics</h3>
+                <p>
+                    Unlike public exchange-traded equities, structured notes trade almost exclusively <strong>over-the-counter (OTC)</strong> where the issuing bank acts as the exclusive market maker.
+                </p>
+
+                <div class="formula-block">
+                    <div class="formula-label">Secondary Market Pricing Formula</div>
+                    $$\text{Bid Price}_{\text{Secondary}}(t) = \text{Fair Market Value}(t) - \frac{1}{2}\text{Bid/Ask Spread} - \text{Remaining Unamortized Fees} - \text{Unwind Friction}$$
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Lifecycle Phase</th>
+                                <th>Typical Bid/Ask Spread</th>
+                                <th>Pricing Behavior &amp; Client Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Primary Subscription ($t = 0$)</strong></td>
+                                <td>$0.0\%$ (Fixed at $100\%$ Par)</td>
+                                <td>Upfront fees embedded in the note. Fair value on day 1 is typically $97.0\% - 97.5\%$.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Early Life ($t < 6\text{ Months}$)</strong></td>
+                                <td>$1.00\% - 1.50\%$</td>
+                                <td>If an investor liquidates immediately, they suffer the full upfront fee load + market maker bid haircut (the "car leaving the lot" depreciation).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mid Life ($t \approx 1 - 3\text{ Years}$)</strong></td>
+                                <td>$0.50\% - 1.00\%$</td>
+                                <td>Bid price tracks fair value of ZCB + surviving options. Bid/ask spreads tighten as maturity approaches.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Near Maturity / Autocall Date</strong></td>
+                                <td>$0.20\% - 0.50\%$</td>
+                                <td>Spreads narrow to money market levels. Price snaps toward redemption par if autocall trigger is assured.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert-box tip">
+                    <div class="alert-title">Clean vs Dirty Secondary Prices</div>
+                    Just like corporate bonds, structured notes with periodic coupons quote on a <strong>clean price</strong> basis on exchanges, while retail wealth statements often display the <strong>dirty price</strong> ($\text{Clean Price} + \text{Accrued Coupon}$). For autocallables with memory coupons, accrued coupons can represent up to $10\% - 20\%$ of the note value!
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             TAB 5: TERM SHEET & INTERVIEW Q&A
+             ========================================================================== -->
+        <div class="tab-panel" id="tab-termsheet">
+            <div class="card">
+                <div class="card-header-bar">
+                    <h2>Anatomy of an Institutional Term Sheet</h2>
+                    <span class="module-badge">Live Market Sample</span>
+                </div>
+
+                <p>
+                    Below is an annotated term sheet for a benchmark European 3-Year Phoenix Autocall EMTN issued by a Tier-1 French investment bank:
+                </p>
+
+                <div class="termsheet-box">
+                    <div class="termsheet-header">
+                        <span>EMTN FINAL TERM SHEET — SUMMARY OF INDICATIVE TERMS</span>
+                        <span style="color: var(--emerald-light);">STATUS: ACTIVE / ISSUED</span>
+                    </div>
+
+                    <div class="termsheet-field">
+                        <span class="key">Issuer:</span>
+                        <span class="val">BNP Paribas Issuance B.V. (Guaranteed by BNP Paribas S.A.)</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">Guarantor Rating:</span>
+                        <span class="val">Aa3 (Moody's) / A+ (S&amp;P) / AA- (Fitch)</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">ISIN / Common Code:</span>
+                        <span class="val">XS2489102847 / 248910284</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">Specified Currency / Par:</span>
+                        <span class="val">EUR / EUR 1,000 per Note (Total Size: EUR 50,000,000)</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">Underlying Asset:</span>
+                        <span class="val">Euro Stoxx 50 Index (SX5E) — Initial Strike $S_0 = 4,200.00\text{ pts}$</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">Maturity / Tenor:</span>
+                        <span class="val">3 Years (6 Semi-Annual Observation Dates)</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">Autocall Barrier ($K_{\text{call}}$):</span>
+                        <span class="val">100% of $S_0$ on any semester $t \ge 1$ (Redemption: 100% Par)</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">Coupon Barrier ($B_{\text{coupon}}$):</span>
+                        <span class="val">75% of $S_0$ (Semi-Annual Coupon = 4.25%, i.e., 8.50% p.a.) with Memory</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">Protection Barrier ($B_{\text{prot}}$):</span>
+                        <span class="val">65% of $S_0$ (Observed strictly at Final Valuation Date $T$)</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">Governing Law:</span>
+                        <span class="val">English Law (Subject to BRRD Bail-In Regulations)</span>
+                    </div>
+                    <div class="termsheet-field">
+                        <span class="key">Structuring Commission:</span>
+                        <span class="val">2.25% upfront included in the Issue Price (100.00%)</span>
+                    </div>
+                </div>
+
+                <h3>Structuring &amp; Sales Desk Interview Flashcards</h3>
+                <p>
+                    Below are 6 real questions asked in S&amp;T Structuring and Derivatives Sales interviews at BNP Paribas, Goldman Sachs, and Barclays. Click any card to reveal the desk-level answer:
+                </p>
+
+                <!-- Q1 -->
+                <div class="qa-card" onclick="toggleQA(this)">
+                    <div class="qa-question">
+                        <span>Q1: "Decompose a 100% Capital-Protected Note with 80% equity participation into vanilla building blocks."</span>
+                        <span class="qa-chevron">▼</span>
+                    </div>
+                    <div class="qa-answer">
+                        <strong>Desk Answer:</strong><br>
+                        The product decomposes into two primary components:
+                        <ol style="margin-top: 6px;">
+                            <li><strong>Zero-Coupon Bond (ZCB):</strong> Buy a ZCB maturing at $100\%$ par on date $T$. In a $4\%$ rate world over 3 years, this costs $\$100 / (1.04)^3 \approx \$88.90$.</li>
+                            <li><strong>At-the-Money Call Option:</strong> With the remaining budget ($\$100 - \$88.90 - \text{Fee} = \$9.10$), buy vanilla ATM European calls on the equity index. If an ATM 3-year call costs $\$11.38$ per unit, your $\$9.10$ budget buys $\frac{9.10}{11.38} = 80\%$ participation.</li>
+                        </ol>
+                        Total package: $\text{ZCB}_{100\%} + 0.80 \times \text{Call}(K = S_0, T)$.
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="qa-card" onclick="toggleQA(this)">
+                    <div class="qa-question">
+                        <span>Q2: "Why do investment banks issue structured notes instead of plain-vanilla senior bonds?"</span>
+                        <span class="qa-chevron">▼</span>
+                    </div>
+                    <div class="qa-answer">
+                        <strong>Desk Answer:</strong><br>
+                        Banks issue structured notes because of <strong>funding arbitrage</strong> and <strong>margin capture</strong>:
+                        <ul>
+                            <li><strong>Sub-Wholesale Funding:</strong> Institutional wholesale bond buyers demand a credit spread of $\text{SOFR} + 120\text{ bps}$. Retail private wealth clients buying structured notes are focused on the headline coupon ($10\%$) or equity participation, effectively accepting sub-benchmark funding ($\text{SOFR} + 30\text{ bps}$).</li>
+                            <li><strong>Upfront Fee Retention:</strong> Vanilla bonds pay underwriting fees of $\approx 0.20\% - 0.40\%$. Structured notes generate $1.5\% - 3.5\%$ in upfront desk margins and retrocessions.</li>
+                            <li><strong>Internal Derivatives Synergy:</strong> The bank captures both the funding spread on the treasury side and the bid/ask margin on the equity derivatives trading desk.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="qa-card" onclick="toggleQA(this)">
+                    <div class="qa-question">
+                        <span>Q3: "Explain what happens to an EMTN structured note under the BRRD bail-in regime if the issuing bank fails."</span>
+                        <span class="qa-chevron">▼</span>
+                    </div>
+                    <div class="qa-answer">
+                        <strong>Desk Answer:</strong><br>
+                        Under the European Bank Recovery and Resolution Directive (BRRD), EMTN structured notes rank as <strong>Senior Unsecured Debt</strong>. If the bank fails:
+                        <ul>
+                            <li>They are <strong>not covered</strong> by the €100,000 national deposit guarantee scheme (which only protects structured deposits).</li>
+                            <li>Resolution authorities possess the statutory power to <strong>permanently write down</strong> the principal of the notes or <strong>convert them into equity shares</strong> of the troubled bank to absorb losses after equity and subordinated debt are wiped out.</li>
+                            <li>Consequently, structured note investors bear 100% issuer credit risk regardless of how well the underlying stock or index performed.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="qa-card" onclick="toggleQA(this)">
+                    <div class="qa-question">
+                        <span>Q4: "What happens to the available Option Budget if interest rates drop from 5% to 1%?"</span>
+                        <span class="qa-chevron">▼</span>
+                    </div>
+                    <div class="qa-answer">
+                        <strong>Desk Answer:</strong><br>
+                        The Option Budget <strong>collapses drastically</strong>:
+                        <ul>
+                            <li>At $5\%$ risk-free rates over a 5-year tenor, the discounted ZCB cost is $\frac{100}{(1.05)^5} = \$78.35$, leaving an enormous Option Budget of <strong>$\$19.65$</strong> (assuming $2\%$ fees).</li>
+                            <li>At $1\%$ risk-free rates, the ZCB cost surges to $\frac{100}{(1.01)^5} = \$95.15$, leaving an Option Budget of only <strong>$\$2.85$</strong>.</li>
+                            <li>Result: It becomes mathematically impossible to offer attractive capital-protected equity notes in zero/low-rate environments. Desks are forced to pivot toward <em>Yield Enhancement</em> products (Barrier Reverse Convertibles) where investors sell options to generate yield.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="qa-card" onclick="toggleQA(this)">
+                    <div class="qa-question">
+                        <span>Q5: "A client buys a 3Y Phoenix Autocall at 100% and wants to unwind after 1 month when spot hasn't moved. Why is the bid price 95%?"</span>
+                        <span class="qa-chevron">▼</span>
+                    </div>
+                    <div class="qa-answer">
+                        <strong>Desk Answer:</strong><br>
+                        The $5\%$ discount is driven by three institutional factors:
+                        <ol style="margin-top: 6px;">
+                            <li><strong>Upfront Fee Friction:</strong> The note was sold at $100\%$ but manufactured at $\$96.50$ (including $2.5\%$ distributor retrocession and $1.0\%$ desk fee). That upfront fee is sunk and cannot be recouped.</li>
+                            <li><strong>Bid/Ask Spread Haircut:</strong> The market maker quotes a $1.00\% - 1.50\%$ bid/ask spread on secondary trading to protect against inventory holding risk.</li>
+                            <li><strong>Trading Desk Unwind Costs:</strong> The exotics desk must unwind its physical delta hedge and close out its OTC option position at bid prices.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="qa-card" onclick="toggleQA(this)">
+                    <div class="qa-question">
+                        <span>Q6: "What is the structural difference between an EMTN and an SPV Repack note in terms of credit risk?"</span>
+                        <span class="qa-chevron">▼</span>
+                    </div>
+                    <div class="qa-answer">
+                        <strong>Desk Answer:</strong><br>
+                        <ul>
+                            <li><strong>EMTN:</strong> The credit risk is <strong>100% tied to the bank's balance sheet</strong>. If the bank defaults, the investor becomes an unsecured creditor in resolution.</li>
+                            <li><strong>SPV Repack:</strong> The note is issued by a <strong>bankruptcy-remote special purpose vehicle</strong>. The investor's principal is collateralized by segregated, high-grade assets (e.g. German Bunds or US Treasuries held in custody). If the arranging bank defaults, the collateral is liquidated to repay noteholders. The investor only has derivative counterparty risk on the swap payoff, not on their principal capital.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Navigation Footer -->
+        <div class="module-nav-footer">
+            <a href="index.html" class="module-nav-btn">
+                ← Back to Catalog
+            </a>
+            <div style="font-family: var(--font-display); font-size: 0.8rem; color: var(--gold-light); letter-spacing: 0.08em; text-transform: uppercase;">
+                Next: Module 02 — Equity-Linked &amp; Autocallables
+            </div>
+            <a href="02_Equity_Linked.html" class="module-nav-btn">
+                Next Module →
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            Structured Products Academy · Module 01: Structuring 101 &amp; Architecture · Built for S&amp;T &amp; Financial Engineering
+        </footer>
+
+    </div>
+
+    <!-- ==========================================================================
+         SCRIPTS: AMBIENT CANVAS, TAB CONTROLLER, SLICER ENGINE, KATEX
+         ========================================================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <script>
+        /* ===== 1. Ambient Luxury Gold Constellation Background ===== */
+        (function() {
+            const canvas = document.getElementById('ambientCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let w, h;
+            let particles = [];
+            const count = 35;
+
+            function resize() {
+                const dpr = window.devicePixelRatio || 1;
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = w * dpr;
+                canvas.height = h * dpr;
+                ctx.scale(dpr, dpr);
+                canvas.style.width = w + 'px';
+                canvas.style.height = h + 'px';
+            }
+
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: Math.random() * w,
+                        y: Math.random() * h,
+                        vx: (Math.random() - 0.5) * 0.3,
+                        vy: (Math.random() - 0.5) * 0.3,
+                        radius: Math.random() * 1.5 + 1.0,
+                        isGold: Math.random() > 0.35
+                    });
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0 || p.x > w) p.vx *= -1;
+                    if (p.y < 0 || p.y > h) p.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.isGold ? 'rgba(212, 175, 55, 0.45)' : 'rgba(16, 185, 129, 0.40)';
+                    ctx.fill();
+
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p2 = particles[j];
+                        const dx = p.x - p2.x;
+                        const dy = p.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 150) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            const alpha = (1 - dist / 150) * 0.14;
+                            ctx.strokeStyle = p.isGold ? `rgba(212, 175, 55, ${alpha})` : `rgba(16, 185, 129, ${alpha})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', () => {
+                resize();
+                initParticles();
+            });
+
+            resize();
+            initParticles();
+            animate();
+        })();
+
+        /* ===== 2. Tab Navigation Controller ===== */
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+                this.classList.add('active');
+                const targetId = this.getAttribute('data-tab');
+                const targetPanel = document.getElementById(targetId);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                    if (targetId === 'tab-pricing' && window.drawBudgetCanvas) {
+                        setTimeout(window.drawBudgetCanvas, 50);
+                    }
+                    if (window.renderMathInElement) {
+                        renderMathInElement(targetPanel, {
+                            delimiters: [
+                                { left: '$$', right: '$$', display: true },
+                                { left: '$', right: '$', display: false }
+                            ],
+                            throwOnError: false
+                        });
+                    }
+                }
+            });
+        });
+
+        /* ===== 3. Q&A Accordion Toggle ===== */
+        function toggleQA(card) {
+            card.classList.toggle('open');
+        }
+
+        /* ===== 4. Interactive Budget Slicer Canvas Engine ===== */
+        (function() {
+            const canvas = document.getElementById('budgetCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const sliderRate = document.getElementById('sliderRate');
+            const sliderSpread = document.getElementById('sliderSpread');
+            const sliderMaturity = document.getElementById('sliderMaturity');
+            const sliderFee = document.getElementById('sliderFee');
+
+            const valRate = document.getElementById('valRate');
+            const valSpread = document.getElementById('valSpread');
+            const valMaturity = document.getElementById('valMaturity');
+            const valFee = document.getElementById('valFee');
+
+            const kpiZcbCost = document.getElementById('kpiZcbCost');
+            const kpiFeeCost = document.getElementById('kpiFeeCost');
+            const kpiOptionBudget = document.getElementById('kpiOptionBudget');
+            const kpiParticipation = document.getElementById('kpiParticipation');
+            const btnReset = document.getElementById('btnResetSlicer');
+
+            function getInputs() {
+                const r = (parseFloat(sliderRate.value) || 0) / 100;
+                const s = (parseFloat(sliderSpread.value) || 0) / 10000;
+                const T = parseFloat(sliderMaturity.value) || 3;
+                const fee = (parseFloat(sliderFee.value) || 2.0) / 100;
+                return { r, s, T, fee };
+            }
+
+            function draw() {
+                const rect = canvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                const w = rect.width;
+                const h = rect.height;
+
+                if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+                    canvas.width = w * dpr;
+                    canvas.height = h * dpr;
+                    ctx.scale(dpr, dpr);
+                }
+
+                ctx.clearRect(0, 0, w, h);
+
+                const { r, s, T, fee } = getInputs();
+
+                // Compute ZCB PV
+                const totalDiscountRate = r + s;
+                const zcbCost = 100 / Math.pow(1 + totalDiscountRate, T);
+                const feeCost = 100 * fee;
+                const optionBudget = Math.max(0, 100 - zcbCost - feeCost);
+
+                // Update text badges
+                valRate.textContent = (r * 100).toFixed(2) + '%';
+                valSpread.textContent = Math.round(s * 10000) + ' bps';
+                valMaturity.textContent = T + (T === 1 ? ' Year' : ' Years');
+                valFee.textContent = (fee * 100).toFixed(2) + '%';
+
+                kpiZcbCost.textContent = '$' + zcbCost.toFixed(2);
+                kpiFeeCost.textContent = '$' + feeCost.toFixed(2);
+                kpiOptionBudget.textContent = '$' + optionBudget.toFixed(2);
+
+                // Estimated ATM Call cost model: approx 4% per sqrt(T) in normalized units
+                const estimatedCallCost = 6.5 * Math.sqrt(T);
+                const participation = (optionBudget / estimatedCallCost) * 100;
+                kpiParticipation.textContent = Math.min(250, participation).toFixed(1) + '%';
+
+                // Render Visual Budget Stack Bar Chart
+                const barWidth = 90;
+                const barX = (w / 2) - (barWidth / 2);
+                const paddingTop = 45;
+                const paddingBottom = 45;
+                const barHeight = h - paddingTop - paddingBottom;
+
+                // Scale: 100% = barHeight
+                const zcbHeight = (zcbCost / 100) * barHeight;
+                const feeHeight = (feeCost / 100) * barHeight;
+                const optHeight = (optionBudget / 100) * barHeight;
+
+                // 1. ZCB Segment (Bottom)
+                const zcbY = paddingTop + barHeight - zcbHeight;
+                ctx.fillStyle = '#0f221a';
+                ctx.fillRect(barX, zcbY, barWidth, zcbHeight);
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(barX, zcbY, barWidth, zcbHeight);
+
+                // 2. Option Budget Segment (Middle)
+                const optY = zcbY - optHeight;
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.22)';
+                ctx.fillRect(barX, optY, barWidth, optHeight);
+                ctx.strokeStyle = '#34d399';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(barX, optY, barWidth, optHeight);
+
+                // 3. Fee Segment (Top)
+                const feeY = optY - feeHeight;
+                ctx.fillStyle = 'rgba(225, 29, 72, 0.22)';
+                ctx.fillRect(barX, feeY, barWidth, feeHeight);
+                ctx.strokeStyle = '#fb7185';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(barX, feeY, barWidth, feeHeight);
+
+                // Outer border for 100% Par Box
+                ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
+                ctx.setLineDash([4, 4]);
+                ctx.strokeRect(barX - 4, paddingTop - 4, barWidth + 8, barHeight + 8);
+                ctx.setLineDash([]);
+
+                // Labels & Callout Lines
+                ctx.font = '11px "JetBrains Mono", monospace';
+                ctx.textAlign = 'left';
+
+                // ZCB Callout
+                ctx.fillStyle = '#d4af37';
+                ctx.fillText(`Zero-Coupon Bond: $${zcbCost.toFixed(1)} (${(zcbCost).toFixed(1)}%)`, barX + barWidth + 16, zcbY + (zcbHeight / 2) + 4);
+
+                // Option Budget Callout
+                ctx.fillStyle = '#34d399';
+                ctx.fillText(`Option Budget: $${optionBudget.toFixed(1)} (${(optionBudget).toFixed(1)}%)`, barX + barWidth + 16, optY + (optHeight / 2) + 4);
+
+                // Fee Callout
+                ctx.fillStyle = '#fb7185';
+                ctx.fillText(`Desk & Dist. Margin: $${feeCost.toFixed(1)} (${(feeCost).toFixed(1)}%)`, barX + barWidth + 16, feeY + (feeHeight / 2) + 4);
+
+                // Top 100% Par Marker
+                ctx.font = '12px "Cinzel", serif';
+                ctx.fillStyle = '#f3e5ab';
+                ctx.textAlign = 'center';
+                ctx.fillText('100.00% PAR ISSUE PRICE', w / 2, paddingTop - 16);
+            }
+
+            window.drawBudgetCanvas = draw;
+
+            [sliderRate, sliderSpread, sliderMaturity, sliderFee].forEach(s => {
+                s.addEventListener('input', draw);
+            });
+
+            btnReset.addEventListener('click', function() {
+                sliderRate.value = 4.00;
+                sliderSpread.value = 75;
+                sliderMaturity.value = 3;
+                sliderFee.value = 2.00;
+                draw();
+            });
+
+            window.addEventListener('resize', draw);
+            draw();
+        })();
+
+        /* ===== 5. Initial KaTeX Rendering ===== */
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.renderMathInElement) {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false }
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+    </script>
+</body>
+</html>
